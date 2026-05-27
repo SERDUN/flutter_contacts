@@ -1,3 +1,16 @@
+## Unreleased
+
+- Add `requiredDataMimetypes:` parameter to `FlutterContacts.getAll(...)`. When
+  set, only contacts that have at least one data row with one of the given
+  mimetypes are returned. On Android this maps to a native
+  `ContactsContract.Data.MIMETYPE IN (...)` filter; on iOS it best-effort maps
+  `phone_v2` / `email_v2` to "has phone" / "has email" predicates. Useful for
+  filtering out synthetic contacts created by messaging apps that never insert
+  standard telephony data rows.
+- Add `RawContact.dataMimetypes` (Android only). When `ContactProperty.identifiers`
+  is requested, each `RawContact` now lists the `Data.MIMETYPE` values it
+  contains. Empty on iOS / macOS.
+
 ## 2.2.0
 
 - Round-trip unknown vCard properties via `contact.extras` (#21).
@@ -62,15 +75,15 @@
 
 ## 1.1.9+2
 
-- Fix wrong namespace on android (https://github.com/QuisApp/flutter_contacts/issues/171) - thanks mattmapadmi
+- Fix wrong namespace on android (<https://github.com/QuisApp/flutter_contacts/issues/171>) - thanks mattmapadmi
 
 ## 1.1.9+1
 
-- Fix openExternalInsert returning null on android (https://github.com/QuisApp/flutter_contacts/issues/100, https://github.com/QuisApp/flutter_contacts/issues/161)
+- Fix openExternalInsert returning null on android (<https://github.com/QuisApp/flutter_contacts/issues/100>, <https://github.com/QuisApp/flutter_contacts/issues/161>)
 
 ## 1.1.9
 
-- Fix kotlin/android incompability issues with java 1.8 and java 17 (https://github.com/QuisApp/flutter_contacts/issues/142, https://github.com/QuisApp/flutter_contacts/issues/147, https://github.com/QuisApp/flutter_contacts/issues/158, https://github.com/QuisApp/flutter_contacts/issues/169, https://github.com/QuisApp/flutter_contacts/pull/170) - thanks to Valent1, Hirohumi, himsarevenus, PcolBP, and other contributors
+- Fix kotlin/android incompability issues with java 1.8 and java 17 (<https://github.com/QuisApp/flutter_contacts/issues/142>, <https://github.com/QuisApp/flutter_contacts/issues/147>, <https://github.com/QuisApp/flutter_contacts/issues/158>, <https://github.com/QuisApp/flutter_contacts/issues/169>, <https://github.com/QuisApp/flutter_contacts/pull/170>) - thanks to Valent1, Hirohumi, himsarevenus, PcolBP, and other contributors
 - Fix openExternalInsert() crash - thanks rahulraj-idt
 
 ## 1.1.8
@@ -79,23 +92,23 @@
 
 ## 1.1.7+1
 
-- Fix for AGP <4.2 (https://github.com/QuisApp/flutter_contacts/issues/127) - thanks trfiladelfo
+- Fix for AGP <4.2 (<https://github.com/QuisApp/flutter_contacts/issues/127>) - thanks trfiladelfo
 
 ## 1.1.7
 
 - Add feature to pre-populate fields in openExternalInsert() - thanks sakchhams
-- Fix openExternalView and openExternalEdit on iOS (https://github.com/QuisApp/flutter_contacts/issues/91, https://github.com/QuisApp/flutter_contacts/issues/70)
-- Support Gradle 8 (https://github.com/QuisApp/flutter_contacts/issues/123)
+- Fix openExternalView and openExternalEdit on iOS (<https://github.com/QuisApp/flutter_contacts/issues/91>, <https://github.com/QuisApp/flutter_contacts/issues/70>)
+- Support Gradle 8 (<https://github.com/QuisApp/flutter_contacts/issues/123>)
 - Fix fetching notes on iOS - thanks starshipcoder and yassinsameh
 - Fix bug with address label default on iOS - thanks MohamedAl-Kainai and yassinsameh
 
 ## 1.1.6
 
-- Update kotlin/gradle versions (https://github.com/QuisApp/flutter_contacts/issues/69)
+- Update kotlin/gradle versions (<https://github.com/QuisApp/flutter_contacts/issues/69>)
 
 ## 1.1.5+1
 
-- Fix null pointer error (https://github.com/QuisApp/flutter_contacts/pull/71 - thanks anggrayudi)
+- Fix null pointer error (<https://github.com/QuisApp/flutter_contacts/pull/71> - thanks anggrayudi)
 - Update README
 
 ## 1.1.5
@@ -104,16 +117,16 @@
 
 ## 1.1.4
 
-- Fix gradle compile error (https://github.com/QuisApp/flutter_contacts/issues/49)
+- Fix gradle compile error (<https://github.com/QuisApp/flutter_contacts/issues/49>)
 
 ## 1.1.3
 
-- Fix social media custom label bug (https://github.com/QuisApp/flutter_contacts/issues/42)
+- Fix social media custom label bug (<https://github.com/QuisApp/flutter_contacts/issues/42>)
 
 ## 1.1.2
 
-- Read/write starred contacts on Android (https://github.com/QuisApp/flutter_contacts/issues/37)
-- Fix vCard photo encoding (https://github.com/QuisApp/flutter_contacts/issues/34)
+- Read/write starred contacts on Android (<https://github.com/QuisApp/flutter_contacts/issues/37>)
+- Fix vCard photo encoding (<https://github.com/QuisApp/flutter_contacts/issues/34>)
 
 ## 1.1.1+2
 
@@ -125,8 +138,8 @@
 
 ## 1.1.1
 
-- Fetch groups (iOS) / labels (Android) and containers (iOS) / accounts (Android) (https://github.com/QuisApp/flutter_contacts/issues/29)
-- Ability to request read-only permissions (https://github.com/QuisApp/flutter_contacts/issues/25)
+- Fetch groups (iOS) / labels (Android) and containers (iOS) / accounts (Android) (<https://github.com/QuisApp/flutter_contacts/issues/29>)
+- Ability to request read-only permissions (<https://github.com/QuisApp/flutter_contacts/issues/25>)
 
 ## 1.1.0+4
 
@@ -146,22 +159,22 @@
 
 ## 1.1.0
 
-- Add ability to open external contact app to view, edit, pick or insert contacts (https://github.com/QuisApp/flutter_contacts/issues/16)
+- Add ability to open external contact app to view, edit, pick or insert contacts (<https://github.com/QuisApp/flutter_contacts/issues/16>)
 
 ## 1.0.0+1
 
-- Fix for permission handler on Android (https://github.com/QuisApp/flutter_contacts/pull/17) - thanks @scroollocker
-- Fix type cast error on iOS 14.5 (https://github.com/QuisApp/flutter_contacts/issues/19) - thanks @jadasi
+- Fix for permission handler on Android (<https://github.com/QuisApp/flutter_contacts/pull/17>) - thanks @scroollocker
+- Fix type cast error on iOS 14.5 (<https://github.com/QuisApp/flutter_contacts/issues/19>) - thanks @jadasi
 
 ## 1.0.0
 
 - Stable release 🎉
-- Follow-up fix for https://github.com/QuisApp/flutter_contacts/issues/9
-- Fix https://github.com/QuisApp/flutter_contacts/issues/14
+- Follow-up fix for <https://github.com/QuisApp/flutter_contacts/issues/9>
+- Fix <https://github.com/QuisApp/flutter_contacts/issues/14>
 
 ## 0.3.3+1
 
-- Fix https://github.com/QuisApp/flutter_contacts/issues/9
+- Fix <https://github.com/QuisApp/flutter_contacts/issues/9>
 
 ## 0.3.3
 
@@ -183,7 +196,7 @@
 
 - Support for requesting permissions
 - Option to return non-visible contacts on Android and raw contacts on Android/iOS
-  (https://github.com/QuisApp/flutter_contacts/issues/5)
+  (<https://github.com/QuisApp/flutter_contacts/issues/5>)
 
 ## 0.2.1
 
@@ -209,11 +222,11 @@
 
 ## 0.1.2
 
-- Properly delete events on iOS (https://github.com/QuisApp/flutter_contacts/issues/2)
+- Properly delete events on iOS (<https://github.com/QuisApp/flutter_contacts/issues/2>)
 
 ## 0.1.1
 
-- Fix date serialization on Android (https://github.com/QuisApp/flutter_contacts/issues/2)
+- Fix date serialization on Android (<https://github.com/QuisApp/flutter_contacts/issues/2>)
 
 ## 0.1.0
 

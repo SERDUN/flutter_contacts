@@ -48,4 +48,40 @@ void main() {
     expect(results, isEmpty);
     expect(log.last.method, 'crud.getAll');
   });
+
+  test(
+    'getAll forwards requiredDataMimetypes to the platform channel',
+    () async {
+      final log = await setUpMockMethodChannel(
+        methodChannel,
+        handler: (call) async => <Map<String, dynamic>>[],
+      );
+
+      await CrudApi.instance.getAll(
+        properties: {ContactProperty.phone},
+        requiredDataMimetypes: const {'vnd.android.cursor.item/phone_v2'},
+      );
+
+      expect(log.last.method, 'crud.getAll');
+      expect(log.last.arguments['requiredDataMimetypes'], [
+        'vnd.android.cursor.item/phone_v2',
+      ]);
+    },
+  );
+
+  test('getAll omits requiredDataMimetypes when empty or null', () async {
+    final log = await setUpMockMethodChannel(
+      methodChannel,
+      handler: (call) async => <Map<String, dynamic>>[],
+    );
+
+    await CrudApi.instance.getAll(
+      properties: {ContactProperty.phone},
+      requiredDataMimetypes: const {},
+    );
+    expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
+
+    await CrudApi.instance.getAll(properties: {ContactProperty.phone});
+    expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
+  });
 }

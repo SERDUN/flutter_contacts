@@ -5,7 +5,12 @@ private extension String {
 }
 
 enum KeysBuilder {
-    static func build(properties: Set<String>, enableIosNotes: Bool) -> [CNKeyDescriptor] {
+    static func build(
+        properties: Set<String>,
+        enableIosNotes: Bool,
+        requirePhone: Bool = false,
+        requireEmail: Bool = false
+    ) -> [CNKeyDescriptor] {
         let has = properties.contains
         var keys: [CNKeyDescriptor] = [
             CNContactIdentifierKey.k,
@@ -20,8 +25,8 @@ enum KeysBuilder {
             ])
         }
 
-        if has("phone") { keys.append(CNContactPhoneNumbersKey.k) }
-        if has("email") { keys.append(CNContactEmailAddressesKey.k) }
+        if has("phone") || requirePhone { keys.append(CNContactPhoneNumbersKey.k) }
+        if has("email") || requireEmail { keys.append(CNContactEmailAddressesKey.k) }
         if has("address") { keys.append(CNContactPostalAddressesKey.k) }
         if has("organization") {
             keys.append(contentsOf: [

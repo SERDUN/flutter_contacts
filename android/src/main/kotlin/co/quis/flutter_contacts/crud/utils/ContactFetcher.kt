@@ -297,6 +297,7 @@ object ContactFetcher {
         filterDict: Map<String, Any?>?,
         account: Account?,
         limit: Int?,
+        requiredDataMimetypes: Set<String>? = null,
     ): List<Contact> {
         val filterResult = ContactFilterUtils.parseAndApply(contentResolver, filterDict)
         val contactIds = filterResult.contactIds
@@ -337,7 +338,7 @@ object ContactFetcher {
         }
 
         // Apply account filter if needed
-        val finalContactIds =
+        val accountFilteredContactIds =
             if (account != null) {
                 val accountFilteredIds =
                     AccountUtils
@@ -350,6 +351,19 @@ object ContactFetcher {
                 contactIdsToFetch.filter { it in accountFilteredIds }
             } else {
                 contactIdsToFetch
+            }
+
+        // Apply required-data-mimetypes filter if needed: keep only contacts
+        // that have at least one data row with a mimetype in [requiredDataMimetypes].
+        val finalContactIds =
+            if (!requiredDataMimetypes.isNullOrEmpty()) {
+                val mimetypeMatchedIds =
+                    ContactFilterUtils
+                        .getContactIdsByDataMimetypes(contentResolver, requiredDataMimetypes)
+                        .toSet()
+                accountFilteredContactIds.filter { it in mimetypeMatchedIds }
+            } else {
+                accountFilteredContactIds
             }
 
         // Apply limit
@@ -512,6 +526,7 @@ object ContactFetcher {
         contactsMap: MutableMap<String, MutableContact>,
     ) {
         if (contactIds.isEmpty()) return
+        val collectedRawContactIds = mutableListOf<String>()
         contentResolver.queryAndProcess(
             RawContacts.CONTENT_URI,
             projection =
@@ -546,8 +561,46 @@ object ContactFetcher {
                             account = account,
                         ),
                     )
+                    if (rawContactId != null) collectedRawContactIds.add(rawContactId)
                 }
             }
         }
+
+        if (collectedRawContactIds.isEmpty()) return
+
+        val mimetypesByRawContact = fetchDataMimetypesPerRawContact(contentResolver, collectedRawContactIds)
+        if (mimetypesByRawContact.isEmpty()) return
+
+        contactIds.forEach { contactId ->
+            val contactData = contactsMap[contactId] ?: return@forEach
+            val updated = contactData.rawContactInfos.map { info ->
+                val mimetypes = info.rawContactId?.let { mimetypesByRawContact[it] }
+                if (mimetypes.isNullOrEmpty()) info else info.copy(dataMimetypes = mimetypes.toList())
+            }
+            contactData.rawContactInfos.clear()
+            contactData.rawContactInfos.addAll(updated)
+        }
+    }
+
+    private fun fetchDataMimetypesPerRawContact(
+        contentResolver: ContentResolver,
+        rawContactIds: List<String>,
+    ): Map<String, Set<String>> {
+        if (rawContactIds.isEmpty()) return emptyMap()
+        val placeholders = rawContactIds.joinToString(",") { "?" }
+        val mimetypesByRawContact = mutableMapOf<String, MutableSet<String>>()
+        contentResolver.queryAndProcess(
+            Data.CONTENT_URI,
+            projection = arrayOf(Data.RAW_CONTACT_ID, Data.MIMETYPE),
+            selection = "${Data.RAW_CONTACT_ID} IN ($placeholders)",
+            selectionArgs = rawContactIds.toTypedArray(),
+        ) { cursor ->
+            cursor.forEachRow { row ->
+                val rawContactId = row.getLongOrNull(Data.RAW_CONTACT_ID)?.toString() ?: return@forEachRow
+                val mimetype = row.getStringOrNull(Data.MIMETYPE) ?: return@forEachRow
+                mimetypesByRawContact.getOrPut(rawContactId) { mutableSetOf() }.add(mimetype)
+            }
+        }
+        return mimetypesByRawContact
     }
 }

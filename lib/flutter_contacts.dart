@@ -208,16 +208,31 @@ class FlutterContacts {
   ///   **Note:** Phone and email filters support partial matching on Android, but only full matching on iOS.
   /// [account] - Optional account filter. Only returns contact data that exists in that account.
   /// [limit] - Optional maximum number of contacts to return.
+  /// [requiredDataMimetypes] - Optional. Returns only contacts that have at least one
+  ///   data row with one of these mimetypes.
+  ///
+  ///   Useful for filtering out synthetic contacts created by messaging apps that
+  ///   never produce standard telephony data rows. For example, passing
+  ///   `{'vnd.android.cursor.item/phone_v2'}` returns only contacts with at least one
+  ///   actual phone number row.
+  ///
+  ///   **Platform behavior:**
+  ///   - **Android**: Native mimetype filter against `ContactsContract.Data`.
+  ///   - **iOS**: Best-effort mapping — `vnd.android.cursor.item/phone_v2` keeps
+  ///     contacts with at least one phone number, `vnd.android.cursor.item/email_v2`
+  ///     keeps contacts with at least one email address. Other mimetypes are ignored.
   static Future<List<Contact>> getAll({
     Set<ContactProperty>? properties,
     ContactFilter? filter,
     Account? account,
     int? limit,
+    Set<String>? requiredDataMimetypes,
   }) => _crud.getAll(
     properties: properties,
     filter: filter,
     account: account,
     limit: limit,
+    requiredDataMimetypes: requiredDataMimetypes,
   );
 
   /// Creates a new contact.

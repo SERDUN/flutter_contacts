@@ -49,6 +49,7 @@ class CrudApi {
     ContactFilter? filter,
     Account? account,
     int? limit,
+    Set<String>? requiredDataMimetypes,
   }) async {
     final props = properties ?? ContactProperties.none;
     final result = await _channel.invokeMethod<List>(
@@ -58,6 +59,8 @@ class CrudApi {
         if (filter != null) 'filter': filter.toJson(),
         if (account != null) 'account': account.toJson(),
         'limit': ?limit,
+        if (requiredDataMimetypes != null && requiredDataMimetypes.isNotEmpty)
+          'requiredDataMimetypes': requiredDataMimetypes.toList(),
       }),
     );
     return JsonHelpers.decodeList(result, Contact.fromJson);

@@ -74,6 +74,29 @@ object ContactFilterUtils {
             arrayOf("%$emailFilter%"),
         )
 
+    /// Returns the set of contact IDs that have at least one data row whose
+    /// `Data.MIMETYPE` is contained in [mimeTypes].
+    ///
+    /// Useful for filtering out synthetic raw_contacts created by apps that do
+    /// not produce standard telephony data rows (e.g., messaging apps that
+    /// register contacts but never insert a `vnd.android.cursor.item/phone_v2`
+    /// row).
+    fun getContactIdsByDataMimetypes(
+        contentResolver: ContentResolver,
+        mimeTypes: Collection<String>,
+    ): List<String> {
+        if (mimeTypes.isEmpty()) return emptyList()
+        val placeholders = mimeTypes.joinToString(",") { "?" }
+        return queryContactIds(
+            contentResolver,
+            Data.CONTENT_URI,
+            Data.CONTACT_ID,
+            arrayOf(Data.CONTACT_ID),
+            "${Data.MIMETYPE} IN ($placeholders)",
+            mimeTypes.toTypedArray(),
+        )
+    }
+
     fun getContactIdsFromGroups(
         contentResolver: ContentResolver,
         groupIds: List<String>,
