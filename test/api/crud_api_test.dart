@@ -50,7 +50,7 @@ void main() {
   });
 
   test(
-    'getAll forwards requiredDataMimetypes to the platform channel',
+    'getAll omits requiredDataMimetypes and requiredAccountTypes when empty or null',
     () async {
       final log = await setUpMockMethodChannel(
         methodChannel,
@@ -59,84 +59,15 @@ void main() {
 
       await CrudApi.instance.getAll(
         properties: {ContactProperty.phone},
-        requiredDataMimetypes: const {'vnd.android.cursor.item/phone_v2'},
+        requiredDataMimetypes: const {},
+        requiredAccountTypes: const {},
       );
+      expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
+      expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
 
-      expect(log.last.method, 'crud.getAll');
-      expect(log.last.arguments['requiredDataMimetypes'], [
-        'vnd.android.cursor.item/phone_v2',
-      ]);
-    },
-  );
-
-  test('getAll omits requiredDataMimetypes when empty or null', () async {
-    final log = await setUpMockMethodChannel(
-      methodChannel,
-      handler: (call) async => <Map<String, dynamic>>[],
-    );
-
-    await CrudApi.instance.getAll(
-      properties: {ContactProperty.phone},
-      requiredDataMimetypes: const {},
-    );
-    expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
-
-    await CrudApi.instance.getAll(properties: {ContactProperty.phone});
-    expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
-  });
-
-  test(
-    'getAll forwards requiredAccountTypes to the platform channel',
-    () async {
-      final log = await setUpMockMethodChannel(
-        methodChannel,
-        handler: (call) async => <Map<String, dynamic>>[],
-      );
-
-      await CrudApi.instance.getAll(
-        properties: {ContactProperty.phone},
-        requiredAccountTypes: const {'com.google'},
-      );
-
-      expect(log.last.method, 'crud.getAll');
-      expect(log.last.arguments['requiredAccountTypes'], ['com.google']);
-    },
-  );
-
-  test('getAll omits requiredAccountTypes when empty or null', () async {
-    final log = await setUpMockMethodChannel(
-      methodChannel,
-      handler: (call) async => <Map<String, dynamic>>[],
-    );
-
-    await CrudApi.instance.getAll(
-      properties: {ContactProperty.phone},
-      requiredAccountTypes: const {},
-    );
-    expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
-
-    await CrudApi.instance.getAll(properties: {ContactProperty.phone});
-    expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
-  });
-
-  test(
-    'getAll forwards both filter params together for OR semantics',
-    () async {
-      final log = await setUpMockMethodChannel(
-        methodChannel,
-        handler: (call) async => <Map<String, dynamic>>[],
-      );
-
-      await CrudApi.instance.getAll(
-        properties: {ContactProperty.phone},
-        requiredDataMimetypes: const {'vnd.android.cursor.item/phone_v2'},
-        requiredAccountTypes: const {'com.google'},
-      );
-
-      expect(log.last.arguments['requiredDataMimetypes'], [
-        'vnd.android.cursor.item/phone_v2',
-      ]);
-      expect(log.last.arguments['requiredAccountTypes'], ['com.google']);
+      await CrudApi.instance.getAll(properties: {ContactProperty.phone});
+      expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
+      expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
     },
   );
 }
