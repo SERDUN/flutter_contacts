@@ -182,16 +182,19 @@ Both `get()` and `getAll()` default to fetching only ID + display name. Specify 
 
 **Filters:** `ContactFilter.name()`, `.phone()`, `.email()`, `.group()`, `.ids()`. Phone/email filters use partial match on Android, full match on iOS.
 
-**Filter by data mimetype** (`getAll` only): pass `requiredDataMimetypes:` to keep only contacts that have at least one data row with one of the given mimetypes. Use it to hide synthetic contacts created by messaging apps (WhatsApp, Viber, Telegram, ...) that register raw_contacts without standard telephony data rows:
+**Filter by data mimetype / account type** (`getAll` only): pass `requiredDataMimetypes:` to keep only contacts that have at least one data row with one of the given mimetypes, and/or `requiredAccountTypes:` to keep contacts that have at least one raw contact in one of the given account types. When both are provided, they are **OR-combined** (contact passes if it matches EITHER).
+
+Use it to hide synthetic contacts created by messaging apps (WhatsApp, Viber, Telegram, ...) that register raw_contacts without standard telephony data rows, while still keeping contacts from a specific account (e.g. Google) regardless of mimetype:
 
 ```dart
 final realPhonebookContacts = await FlutterContacts.getAll(
   properties: {ContactProperty.name, ContactProperty.phone},
   requiredDataMimetypes: {'vnd.android.cursor.item/phone_v2'},
+  requiredAccountTypes: {'com.google'},
 );
 ```
 
-On iOS this best-effort maps `phone_v2` → "has at least one phone number" and `email_v2` → "has at least one email"; other mimetypes are ignored. To inspect what mimetypes a raw contact contains, request `ContactProperty.identifiers` and read `contact.android?.identifiers?.rawContacts[*].dataMimetypes` (Android only).
+On iOS, `requiredDataMimetypes` best-effort maps `phone_v2` → "has at least one phone number" and `email_v2` → "has at least one email"; other mimetypes are ignored. `requiredAccountTypes` is Android-only (no equivalent on iOS). To inspect what mimetypes a raw contact contains, request `ContactProperty.identifiers` and read `contact.android?.identifiers?.rawContacts[*].dataMimetypes` (Android only).
 
 ### Create
 

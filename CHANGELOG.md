@@ -7,6 +7,11 @@
   `phone_v2` / `email_v2` to "has phone" / "has email" predicates. Useful for
   filtering out synthetic contacts created by messaging apps that never insert
   standard telephony data rows.
+- Add `requiredAccountTypes:` parameter to `FlutterContacts.getAll(...)`. When
+  set, returns contacts that have at least one raw contact whose
+  `RawContacts.ACCOUNT_TYPE` matches. **OR-combined** with `requiredDataMimetypes`
+  when both are provided — a contact passes if it matches EITHER condition.
+  Android-only; ignored on iOS (no equivalent of Android account types).
 - Add `RawContact.dataMimetypes` (Android only). When `ContactProperty.identifiers`
   is requested, each `RawContact` now lists the `Data.MIMETYPE` values it
   contains. Empty on iOS / macOS.

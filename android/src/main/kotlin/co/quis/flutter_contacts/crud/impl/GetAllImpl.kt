@@ -26,6 +26,7 @@ class GetAllImpl(
         val account = Account.fromJson(call.argMap("account"))
         val limit = call.argInt("limit")
         val requiredDataMimetypes = call.argList<String>("requiredDataMimetypes")?.toSet()
+        val requiredAccountTypes = call.argList<String>("requiredAccountTypes")?.toSet()
         val contacts =
             ContactFetcher.getAllContacts(
                 context.contentResolver,
@@ -34,6 +35,7 @@ class GetAllImpl(
                 account,
                 limit,
                 requiredDataMimetypes,
+                requiredAccountTypes,
             )
         postResult(result, contacts.map { it.toJson() })
     }

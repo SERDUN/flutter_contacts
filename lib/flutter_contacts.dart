@@ -221,18 +221,31 @@ class FlutterContacts {
   ///   - **iOS**: Best-effort mapping — `vnd.android.cursor.item/phone_v2` keeps
   ///     contacts with at least one phone number, `vnd.android.cursor.item/email_v2`
   ///     keeps contacts with at least one email address. Other mimetypes are ignored.
+  ///
+  /// [requiredAccountTypes] - Optional. Returns only contacts that have at least one
+  ///   raw contact whose `ACCOUNT_TYPE` is one of these values (e.g. `com.google`).
+  ///
+  ///   When combined with [requiredDataMimetypes], the two filters are **OR-combined**:
+  ///   a contact passes if it matches EITHER condition. Use this to keep contacts from
+  ///   trusted accounts that don't carry the required mimetypes.
+  ///
+  ///   **Platform behavior:**
+  ///   - **Android**: Native filter against `ContactsContract.RawContacts.ACCOUNT_TYPE`.
+  ///   - **iOS**: Ignored. iOS contacts have no equivalent of Android account types.
   static Future<List<Contact>> getAll({
     Set<ContactProperty>? properties,
     ContactFilter? filter,
     Account? account,
     int? limit,
     Set<String>? requiredDataMimetypes,
+    Set<String>? requiredAccountTypes,
   }) => _crud.getAll(
     properties: properties,
     filter: filter,
     account: account,
     limit: limit,
     requiredDataMimetypes: requiredDataMimetypes,
+    requiredAccountTypes: requiredAccountTypes,
   );
 
   /// Creates a new contact.

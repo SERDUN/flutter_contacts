@@ -298,6 +298,7 @@ object ContactFetcher {
         account: Account?,
         limit: Int?,
         requiredDataMimetypes: Set<String>? = null,
+        requiredAccountTypes: Set<String>? = null,
     ): List<Contact> {
         val filterResult = ContactFilterUtils.parseAndApply(contentResolver, filterDict)
         val contactIds = filterResult.contactIds
@@ -353,17 +354,37 @@ object ContactFetcher {
                 contactIdsToFetch
             }
 
-        // Apply required-data-mimetypes filter if needed: keep only contacts
-        // that have at least one data row with a mimetype in [requiredDataMimetypes].
-        val finalContactIds =
-            if (!requiredDataMimetypes.isNullOrEmpty()) {
-                val mimetypeMatchedIds =
+        // Apply OR-combined filter on [requiredDataMimetypes] and [requiredAccountTypes].
+        // A contact passes when it has at least one data row with one of the given
+        // mimetypes, OR it has at least one raw contact whose account type matches.
+        // When both are null/empty, no filtering is applied at this stage.
+        val mimetypeMatchedIds =
+            requiredDataMimetypes
+                ?.takeIf { it.isNotEmpty() }
+                ?.let {
                     ContactFilterUtils
-                        .getContactIdsByDataMimetypes(contentResolver, requiredDataMimetypes)
+                        .getContactIdsByDataMimetypes(contentResolver, it)
                         .toSet()
-                accountFilteredContactIds.filter { it in mimetypeMatchedIds }
-            } else {
-                accountFilteredContactIds
+                }
+        val accountTypeMatchedIds =
+            requiredAccountTypes
+                ?.takeIf { it.isNotEmpty() }
+                ?.let {
+                    ContactFilterUtils
+                        .getContactIdsByAccountTypes(contentResolver, it)
+                        .toSet()
+                }
+        val finalContactIds =
+            when {
+                mimetypeMatchedIds != null && accountTypeMatchedIds != null -> {
+                    val union = mimetypeMatchedIds + accountTypeMatchedIds
+                    accountFilteredContactIds.filter { it in union }
+                }
+                mimetypeMatchedIds != null ->
+                    accountFilteredContactIds.filter { it in mimetypeMatchedIds }
+                accountTypeMatchedIds != null ->
+                    accountFilteredContactIds.filter { it in accountTypeMatchedIds }
+                else -> accountFilteredContactIds
             }
 
         // Apply limit

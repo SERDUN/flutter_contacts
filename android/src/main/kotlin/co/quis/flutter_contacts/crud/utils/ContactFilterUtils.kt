@@ -7,6 +7,7 @@ import android.provider.ContactsContract.CommonDataKinds.GroupMembership
 import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.provider.ContactsContract.Contacts
 import android.provider.ContactsContract.Data
+import android.provider.ContactsContract.RawContacts
 
 data class FilterResult(
     val contactIds: List<String>?,
@@ -94,6 +95,28 @@ object ContactFilterUtils {
             arrayOf(Data.CONTACT_ID),
             "${Data.MIMETYPE} IN ($placeholders)",
             mimeTypes.toTypedArray(),
+        )
+    }
+
+    /// Returns the set of contact IDs that have at least one raw contact whose
+    /// `RawContacts.ACCOUNT_TYPE` is contained in [accountTypes].
+    ///
+    /// Useful as an OR-fallback alongside [getContactIdsByDataMimetypes] — e.g.
+    /// to include all contacts from a specific account (Google, Exchange, etc.)
+    /// regardless of which data mimetypes they carry.
+    fun getContactIdsByAccountTypes(
+        contentResolver: ContentResolver,
+        accountTypes: Collection<String>,
+    ): List<String> {
+        if (accountTypes.isEmpty()) return emptyList()
+        val placeholders = accountTypes.joinToString(",") { "?" }
+        return queryContactIds(
+            contentResolver,
+            RawContacts.CONTENT_URI,
+            RawContacts.CONTACT_ID,
+            arrayOf(RawContacts.CONTACT_ID),
+            "${RawContacts.ACCOUNT_TYPE} IN ($placeholders)",
+            accountTypes.toTypedArray(),
         )
     }
 
