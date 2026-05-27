@@ -43,29 +43,24 @@ class RawContact {
   static RawContact? fromJson(Map? json) {
     if (json == null) return null;
     final accountJson = json['account'];
-    final account = accountJson != null
-        ? Account.fromJson(accountJson as Map)
-        : null;
-    final rawContactId = JsonHelpers.decode<String>(json['rawContactId']);
-    final sourceId = JsonHelpers.decode<String>(json['sourceId']);
-    final dataMimetypes =
-        (json['dataMimetypes'] as List?)?.whereType<String>().toList(
-          growable: false,
-        ) ??
-        const [];
-    if (rawContactId == null &&
-        sourceId == null &&
-        account == null &&
-        dataMimetypes.isEmpty) {
-      return null;
-    }
-    return RawContact(
-      rawContactId: rawContactId,
-      sourceId: sourceId,
-      account: account,
-      dataMimetypes: dataMimetypes,
+    final raw = RawContact(
+      rawContactId: JsonHelpers.decode<String>(json['rawContactId']),
+      sourceId: JsonHelpers.decode<String>(json['sourceId']),
+      account: accountJson == null
+          ? null
+          : Account.fromJson(accountJson as Map),
+      dataMimetypes: List<String>.from(
+        json['dataMimetypes'] as List? ?? const [],
+      ),
     );
+    return raw._isEmpty ? null : raw;
   }
+
+  bool get _isEmpty =>
+      rawContactId == null &&
+      sourceId == null &&
+      account == null &&
+      dataMimetypes.isEmpty;
 
   @override
   String toString() => JsonHelpers.formatToString('RawContact', {
