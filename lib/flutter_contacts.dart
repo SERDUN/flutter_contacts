@@ -208,44 +208,41 @@ class FlutterContacts {
   ///   **Note:** Phone and email filters support partial matching on Android, but only full matching on iOS.
   /// [account] - Optional account filter. Only returns contact data that exists in that account.
   /// [limit] - Optional maximum number of contacts to return.
-  /// [requiredDataMimetypes] - Optional. Returns only contacts that have at least one
-  ///   data row with one of these mimetypes.
+  /// [androidRequiredDataMimetypes] - Optional, Android-only. Returns only contacts
+  ///   that have at least one data row with one of these mimetypes.
   ///
-  ///   Useful for filtering out synthetic contacts created by messaging apps that
-  ///   never produce standard telephony data rows. For example, passing
-  ///   `{'vnd.android.cursor.item/phone_v2'}` returns only contacts with at least one
-  ///   actual phone number row.
+  ///   Native filter against `ContactsContract.Data.MIMETYPE`. Useful for filtering
+  ///   out synthetic contacts created by messaging apps that never produce standard
+  ///   telephony data rows — e.g. pass `{'vnd.android.cursor.item/phone_v2'}` to
+  ///   only return contacts that have at least one phone number row.
   ///
-  ///   **Platform behavior:**
-  ///   - **Android**: Native mimetype filter against `ContactsContract.Data`.
-  ///   - **iOS**: Best-effort mapping — `vnd.android.cursor.item/phone_v2` keeps
-  ///     contacts with at least one phone number, `vnd.android.cursor.item/email_v2`
-  ///     keeps contacts with at least one email address. Other mimetypes are ignored.
+  ///   Ignored on iOS / macOS (no equivalent of Android data-row mimetypes).
   ///
-  /// [requiredAccountTypes] - Optional. Returns only contacts that have at least one
-  ///   raw contact whose `ACCOUNT_TYPE` is one of these values (e.g. `com.google`).
+  /// [androidRequiredAccountTypes] - Optional, Android-only. Returns contacts that
+  ///   have at least one raw contact whose `ACCOUNT_TYPE` is one of these values
+  ///   (e.g. `com.google`).
   ///
-  ///   When combined with [requiredDataMimetypes], the two filters are **OR-combined**:
-  ///   a contact passes if it matches EITHER condition. Use this to keep contacts from
-  ///   trusted accounts that don't carry the required mimetypes.
+  ///   When combined with [androidRequiredDataMimetypes], the two filters are
+  ///   **OR-combined** — a contact passes if it matches EITHER condition. Use this
+  ///   to keep contacts from trusted accounts that don't carry the required
+  ///   mimetypes.
   ///
-  ///   **Platform behavior:**
-  ///   - **Android**: Native filter against `ContactsContract.RawContacts.ACCOUNT_TYPE`.
-  ///   - **iOS**: Ignored. iOS contacts have no equivalent of Android account types.
+  ///   Native filter against `ContactsContract.RawContacts.ACCOUNT_TYPE`. Ignored
+  ///   on iOS / macOS (no equivalent of Android account types).
   static Future<List<Contact>> getAll({
     Set<ContactProperty>? properties,
     ContactFilter? filter,
     Account? account,
     int? limit,
-    Set<String>? requiredDataMimetypes,
-    Set<String>? requiredAccountTypes,
+    Set<String>? androidRequiredDataMimetypes,
+    Set<String>? androidRequiredAccountTypes,
   }) => _crud.getAll(
     properties: properties,
     filter: filter,
     account: account,
     limit: limit,
-    requiredDataMimetypes: requiredDataMimetypes,
-    requiredAccountTypes: requiredAccountTypes,
+    androidRequiredDataMimetypes: androidRequiredDataMimetypes,
+    androidRequiredAccountTypes: androidRequiredAccountTypes,
   );
 
   /// Creates a new contact.

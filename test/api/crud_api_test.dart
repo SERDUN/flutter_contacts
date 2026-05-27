@@ -50,7 +50,7 @@ void main() {
   });
 
   test(
-    'getAll omits requiredDataMimetypes and requiredAccountTypes when empty or null',
+    'getAll omits androidRequiredDataMimetypes and androidRequiredAccountTypes when empty or null',
     () async {
       final log = await setUpMockMethodChannel(
         methodChannel,
@@ -59,15 +59,27 @@ void main() {
 
       await CrudApi.instance.getAll(
         properties: {ContactProperty.phone},
-        requiredDataMimetypes: const {},
-        requiredAccountTypes: const {},
+        androidRequiredDataMimetypes: const {},
+        androidRequiredAccountTypes: const {},
       );
-      expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
-      expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
+      expect(
+        log.last.arguments.containsKey('androidRequiredDataMimetypes'),
+        isFalse,
+      );
+      expect(
+        log.last.arguments.containsKey('androidRequiredAccountTypes'),
+        isFalse,
+      );
 
       await CrudApi.instance.getAll(properties: {ContactProperty.phone});
-      expect(log.last.arguments.containsKey('requiredDataMimetypes'), isFalse);
-      expect(log.last.arguments.containsKey('requiredAccountTypes'), isFalse);
+      expect(
+        log.last.arguments.containsKey('androidRequiredDataMimetypes'),
+        isFalse,
+      );
+      expect(
+        log.last.arguments.containsKey('androidRequiredAccountTypes'),
+        isFalse,
+      );
     },
   );
 }

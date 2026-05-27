@@ -25,8 +25,8 @@ class GetAllImpl(
         val filterDict = call.argMap("filter") as? Map<String, Any?>
         val account = Account.fromJson(call.argMap("account"))
         val limit = call.argInt("limit")
-        val requiredDataMimetypes = call.argList<String>("requiredDataMimetypes")?.toSet()
-        val requiredAccountTypes = call.argList<String>("requiredAccountTypes")?.toSet()
+        val requiredDataMimetypes = call.argList<String>("androidRequiredDataMimetypes")?.toSet()
+        val requiredAccountTypes = call.argList<String>("androidRequiredAccountTypes")?.toSet()
         val contacts =
             ContactFetcher.getAllContacts(
                 context.contentResolver,
