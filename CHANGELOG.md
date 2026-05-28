@@ -1,16 +1,13 @@
 ## Unreleased
 
-- Add `androidRequiredDataMimetypes:` parameter to `FlutterContacts.getAll(...)`.
-  When set, returns only contacts that have at least one data row with one of
-  the given mimetypes. Native pre-filter against
-  `ContactsContract.Data.MIMETYPE IN (...)`. Useful for filtering out synthetic
-  contacts created by messaging apps that never insert standard telephony data
-  rows. Ignored on iOS / macOS (no equivalent concept).
-- Add `androidRequiredAccountTypes:` parameter to `FlutterContacts.getAll(...)`.
-  When set, returns contacts that have at least one raw contact whose
-  `RawContacts.ACCOUNT_TYPE` matches. **OR-combined** with
-  `androidRequiredDataMimetypes` when both are provided — a contact passes if it
-  matches EITHER. Ignored on iOS / macOS.
+- Add `androidFilter:` parameter to `FlutterContacts.getAll(...)`. Accepts a
+  composable `AndroidContactFilter` expression with two leaf predicates
+  (`hasDataMimetype(Set<String>)`, `hasAccountType(Set<String>)`) and two
+  combinators (`and([...])`, `or([...])`). Leaves resolve to native SQL queries
+  against `ContactsContract`; combinators intersect / union the resulting
+  contact-ID sets. Ignored on iOS / macOS — the `android` prefix in the type
+  name makes the platform scope explicit so callers don't need
+  `Platform.isAndroid` gates.
 - Add `RawContact.dataMimetypes` (Android only). When `ContactProperty.identifiers`
   is requested, each `RawContact` now lists the `Data.MIMETYPE` values it
   contains. Empty on iOS / macOS.

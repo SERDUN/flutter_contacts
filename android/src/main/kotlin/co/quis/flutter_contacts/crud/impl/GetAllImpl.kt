@@ -6,6 +6,7 @@ import co.quis.flutter_contacts.common.BaseHandler
 import co.quis.flutter_contacts.common.argInt
 import co.quis.flutter_contacts.common.argList
 import co.quis.flutter_contacts.common.argMap
+import co.quis.flutter_contacts.crud.utils.AndroidContactFilter
 import co.quis.flutter_contacts.crud.utils.ContactFetcher
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -25,8 +26,9 @@ class GetAllImpl(
         val filterDict = call.argMap("filter") as? Map<String, Any?>
         val account = Account.fromJson(call.argMap("account"))
         val limit = call.argInt("limit")
-        val requiredDataMimetypes = call.argList<String>("androidRequiredDataMimetypes")?.toSet()
-        val requiredAccountTypes = call.argList<String>("androidRequiredAccountTypes")?.toSet()
+
+        @Suppress("UNCHECKED_CAST")
+        val androidFilter = AndroidContactFilter.fromJson(call.argMap("androidFilter") as? Map<String, Any?>)
         val contacts =
             ContactFetcher.getAllContacts(
                 context.contentResolver,
@@ -34,8 +36,7 @@ class GetAllImpl(
                 filterDict,
                 account,
                 limit,
-                requiredDataMimetypes,
-                requiredAccountTypes,
+                androidFilter,
             )
         postResult(result, contacts.map { it.toJson() })
     }

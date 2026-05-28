@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_contacts/api/crud_api.dart';
+import 'package:flutter_contacts/models/android/android_contact_filter.dart';
 import 'package:flutter_contacts/models/contact/contact_property.dart';
 import '../support/test_channels.dart';
 
@@ -49,37 +50,35 @@ void main() {
     expect(log.last.method, 'crud.getAll');
   });
 
-  test(
-    'getAll omits androidRequiredDataMimetypes and androidRequiredAccountTypes when empty or null',
-    () async {
-      final log = await setUpMockMethodChannel(
-        methodChannel,
-        handler: (call) async => <Map<String, dynamic>>[],
-      );
+  test('getAll omits androidFilter when null', () async {
+    final log = await setUpMockMethodChannel(
+      methodChannel,
+      handler: (call) async => <Map<String, dynamic>>[],
+    );
 
-      await CrudApi.instance.getAll(
-        properties: {ContactProperty.phone},
-        androidRequiredDataMimetypes: const {},
-        androidRequiredAccountTypes: const {},
-      );
-      expect(
-        log.last.arguments.containsKey('androidRequiredDataMimetypes'),
-        isFalse,
-      );
-      expect(
-        log.last.arguments.containsKey('androidRequiredAccountTypes'),
-        isFalse,
-      );
+    await CrudApi.instance.getAll(properties: {ContactProperty.phone});
 
-      await CrudApi.instance.getAll(properties: {ContactProperty.phone});
-      expect(
-        log.last.arguments.containsKey('androidRequiredDataMimetypes'),
-        isFalse,
-      );
-      expect(
-        log.last.arguments.containsKey('androidRequiredAccountTypes'),
-        isFalse,
-      );
-    },
-  );
+    expect(log.last.arguments.containsKey('androidFilter'), isFalse);
+  });
+
+  test('getAll forwards androidFilter as a serialized tree', () async {
+    final log = await setUpMockMethodChannel(
+      methodChannel,
+      handler: (call) async => <Map<String, dynamic>>[],
+    );
+
+    final filter = AndroidContactFilter.or([
+      AndroidContactFilter.hasDataMimetype(const {
+        'vnd.android.cursor.item/phone_v2',
+      }),
+      AndroidContactFilter.hasAccountType(const {'com.google'}),
+    ]);
+
+    await CrudApi.instance.getAll(
+      properties: {ContactProperty.phone},
+      androidFilter: filter,
+    );
+
+    expect(log.last.arguments['androidFilter'], filter.toJson());
+  });
 }

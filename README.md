@@ -182,16 +182,30 @@ Both `get()` and `getAll()` default to fetching only ID + display name. Specify 
 
 **Filters:** `ContactFilter.name()`, `.phone()`, `.email()`, `.group()`, `.ids()`. Phone/email filters use partial match on Android, full match on iOS.
 
-**Android-only filter by data mimetype / account type** (`getAll` only): pass `androidRequiredDataMimetypes:` to keep only contacts that have at least one data row with one of the given mimetypes, and/or `androidRequiredAccountTypes:` to keep contacts that have at least one raw contact in one of the given account types. When both are provided, they are **OR-combined** (contact passes if it matches EITHER). Both parameters are ignored on iOS / macOS — the platform name prefix makes the scope explicit at the call site, so callers don't have to gate on `Platform.isAndroid`.
+**Android-only filter expression** (`getAll` only): pass `androidFilter:` with a composable `AndroidContactFilter`. Two leaf predicates (`hasDataMimetype(Set<String>)`, `hasAccountType(Set<String>)`) combine via `and([...])` / `or([...])`. Leaves resolve to native SQL queries against `ContactsContract`; combinators intersect (`and`) or union (`or`) the resulting contact-ID sets. Ignored on iOS / macOS — the `android` prefix makes the platform scope explicit so callers don't have to gate on `Platform.isAndroid`.
 
 Use it to hide synthetic contacts created by messaging apps (WhatsApp, Viber, Telegram, ...) that register raw_contacts without standard telephony data rows, while still keeping contacts from a specific account (e.g. Google) regardless of mimetype:
 
 ```dart
 final realPhonebookContacts = await FlutterContacts.getAll(
   properties: {ContactProperty.name, ContactProperty.phone},
-  androidRequiredDataMimetypes: {'vnd.android.cursor.item/phone_v2'},
-  androidRequiredAccountTypes: {'com.google'},
+  androidFilter: AndroidContactFilter.or([
+    AndroidContactFilter.hasDataMimetype({'vnd.android.cursor.item/phone_v2'}),
+    AndroidContactFilter.hasAccountType({'com.google'}),
+  ]),
 );
+```
+
+Compose nested expressions for tighter scopes, e.g. "only Google contacts that have either a phone or an email":
+
+```dart
+androidFilter: AndroidContactFilter.and([
+  AndroidContactFilter.hasAccountType({'com.google'}),
+  AndroidContactFilter.or([
+    AndroidContactFilter.hasDataMimetype({'vnd.android.cursor.item/phone_v2'}),
+    AndroidContactFilter.hasDataMimetype({'vnd.android.cursor.item/email_v2'}),
+  ]),
+])
 ```
 
 To inspect what mimetypes a raw contact contains, request `ContactProperty.identifiers` and read `contact.android?.identifiers?.rawContacts[*].dataMimetypes` (Android only).

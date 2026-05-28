@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import '../utils/json_helpers.dart';
+import '../models/android/android_contact_filter.dart';
 import '../models/contact/contact.dart';
 import '../models/accounts/account.dart';
 import '../models/contact/contact_property.dart';
@@ -49,8 +50,7 @@ class CrudApi {
     ContactFilter? filter,
     Account? account,
     int? limit,
-    Set<String>? androidRequiredDataMimetypes,
-    Set<String>? androidRequiredAccountTypes,
+    AndroidContactFilter? androidFilter,
   }) async {
     final props = properties ?? ContactProperties.none;
     final result = await _channel.invokeMethod<List>(
@@ -60,12 +60,7 @@ class CrudApi {
         if (filter != null) 'filter': filter.toJson(),
         if (account != null) 'account': account.toJson(),
         'limit': ?limit,
-        if (androidRequiredDataMimetypes != null &&
-            androidRequiredDataMimetypes.isNotEmpty)
-          'androidRequiredDataMimetypes': androidRequiredDataMimetypes.toList(),
-        if (androidRequiredAccountTypes != null &&
-            androidRequiredAccountTypes.isNotEmpty)
-          'androidRequiredAccountTypes': androidRequiredAccountTypes.toList(),
+        if (androidFilter != null) 'androidFilter': androidFilter.toJson(),
       }),
     );
     return JsonHelpers.decodeList(result, Contact.fromJson);

@@ -101,9 +101,9 @@ object ContactFilterUtils {
     /// Returns the set of contact IDs that have at least one raw contact whose
     /// `RawContacts.ACCOUNT_TYPE` is contained in [accountTypes].
     ///
-    /// Useful as an OR-fallback alongside [getContactIdsByDataMimetypes] — e.g.
-    /// to include all contacts from a specific account (Google, Exchange, etc.)
-    /// regardless of which data mimetypes they carry.
+    /// Used by [AndroidContactFilter.HasAccountType] to scope a query to a
+    /// specific account family (Google, Exchange, ...) regardless of which
+    /// data mimetypes the contact carries.
     fun getContactIdsByAccountTypes(
         contentResolver: ContentResolver,
         accountTypes: Collection<String>,
